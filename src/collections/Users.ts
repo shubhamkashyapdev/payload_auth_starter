@@ -1,25 +1,9 @@
 import { CollectionConfig } from 'payload/types';
 import { isAdmin } from '../access/admin';
 import { OTPPayload } from '../types';
-import sgMail from '@sendgrid/mail'
-sgMail.setApiKey(process.env.SENDGRID_API_KEY)
+import { getToken } from '../utils/utils';
+import { sendEmail } from './hooks/SendEmail';
 
-export const sendEmail = ({ to, subject, html }) => {
-  const msg = {
-    to,
-    from: 'saffron.shubham@gmail.com',
-    subject,
-    html,
-  }
-  sgMail
-    .send(msg)
-    .then(() => {
-      console.log('Email sent successfully!')
-    })
-    .catch((error) => {
-      console.error(error)
-    })
-}
 
 const Users: CollectionConfig = {
   slug: 'users',
@@ -63,7 +47,7 @@ const Users: CollectionConfig = {
       async ({ req, operation, data }) => {
         if (operation === 'create') {
           // generate the email OTP token - max 4 Digits
-          let token = Math.floor(Math.random() * 10000).toString();
+          let token = getToken()
 
           if (data.role === 'user') {
             // send the token to user's email address
