@@ -1,6 +1,7 @@
 import { CollectionConfig } from 'payload/types';
 import { isAdmin } from '../access/admin';
 import { OTPPayload } from '../types';
+import { userRoles } from '../utils/roles';
 import { getToken } from '../utils/utils';
 import { sendEmail } from './hooks/SendEmail';
 
@@ -20,50 +21,87 @@ const Users: CollectionConfig = {
   },
   fields: [
     {
+      name: "name",
+      type: "text",
+      required: true,
+    },
+    {
+      name: "phone_number",
+      type: "text",
+      required: true,
+    },
+    {
+      name: "designation",
+      type: "text",
+    },
+    {
+      name: "company_name",
+      type: "text",
+
+    },
+    {
+      name: "linkedin_url",
+      type: "text",
+    },
+    {
+      name: "website_url",
+      type: "text",
+    },
+    {
       name: "role",
       type: "select",
       options: [
         { label: 'Admin', value: 'admin' },
-        { label: 'User', value: 'user' },
+        { label: 'Startup', value: 'startup' },
+        { label: 'Investor', value: 'investor' },
       ],
       required: true,
-      defaultValue: "user"
+      defaultValue: "startup"
     },
     {
       name: "isVerified",
-      type: "number",
-      defaultValue: 0,
+      type: "select",
+      options: [
+        { label: "Verified", value: "1" }, { label: "Not Verified", value: "0" }
+      ],
+      defaultValue: "0",
       required: true,
     },
     {
       name: "otp",
       type: "text",
       maxLength: 4,
-      required: false,
+
     }
   ],
+  timestamps: true,
   hooks: {
     beforeChange: [
       async ({ req, operation, data }) => {
         if (operation === 'create') {
+          // check if role is valid
+          const reqUserRole = req?.user?.role;
+          console.log({ isValidRole: userRoles.includes(data.role) })
+          if (reqUserRole !== 'admin' && !userRoles.includes(data.role)) {
+            throw new Error("Invalid Role Assigned To User");
+          }
+
           // generate the email OTP token - max 4 Digits
           let token = getToken()
-
-          if (data.role === 'user') {
+          if (data.role !== 'admin') {
             // send the token to user's email address
             sendEmail({ to: data.email, subject: "CresEquity Account Verification Email OTP", html: `<h1>Your Verification Code is: ${token}</h1>` })
 
-
             data.otp = token;
-            if (req?.user?.role === 'admin') {
+            if (reqUserRole === 'admin') {
               return data
             } else {
-              data.isVerified = 0;
+              data.isVerified = "0";
               return data;
             }
           }
-          if (data.role === 'admin' && req?.user?.role !== 'admin') {
-            throw new Error("User havig role user is not allowed to create user with admin access");
+          if (data.role === 'admin' && reqUserRole !== 'admin') {
+            throw new Error("User having role user is not allowed to create user with admin access");
           }
         }
       },
@@ -71,7 +109,7 @@ const Users: CollectionConfig = {
     afterLogin: [
       async ({ req: { user } }) => {
         // check if account is verified
-        if (user.isVerified) {
+        if (Number(user.isVerified)) {
           return true
         } else {
           throw new Error("Please Verify Your Account!!")
@@ -86,8 +124,9 @@ const Users: CollectionConfig = {
       handler: async (req, res, next) => {
         const payload = req.payload;
         const body: OTPPayload = req.body;
+
         if (!body?.id || !body?.otp) {
-          res.status(400).json({ message: "Please provide a valid otp address and user ID" })
+          return res.status(400).json({ message: "Please provide a valid otp and user ID" })
         }
         // get user by provided ID
         try {
@@ -97,6 +136,10 @@ const Users: CollectionConfig = {
           });
           if (!user) {
             res.status(404).json("No user found with provided user ID");
+          }
+          // check if account is already verified
+          if (Number(user.isVerified)) {
+            return res.status(200).json({ message: "User account is already verified!" })
           }
           if (user.otp === body.otp) {
             // verify the user account
