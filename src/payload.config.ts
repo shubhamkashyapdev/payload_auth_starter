@@ -2,6 +2,9 @@ import { buildConfig } from 'payload/config';
 import path from 'path';
 // import Examples from './collections/Examples';
 import Users from './collections/Users';
+import { Investor } from './collections/Investor';
+import { Startup } from './collections/Startup';
+import { Settings } from './collections/Settings';
 const sendEmilPath = path.resolve(__dirname, 'collections/hooks/SendEmail.ts');
 const mockEmailModulePath = path.resolve(__dirname, 'mocks/sendEmail.ts');
 export default buildConfig({
@@ -21,6 +24,9 @@ export default buildConfig({
   },
   collections: [
     Users,
+    Investor,
+    Startup,
+    Settings,
   ],
   typescript: {
     outputFile: path.resolve(__dirname, 'payload-types.ts'),

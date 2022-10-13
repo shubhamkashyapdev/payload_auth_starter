@@ -81,7 +81,7 @@ const Users: CollectionConfig = {
         if (operation === 'create') {
           // check if role is valid
           const reqUserRole = req?.user?.role;
-          console.log({ isValidRole: userRoles.includes(data.role) })
+
           if (reqUserRole !== 'admin' && !userRoles.includes(data.role)) {
             throw new Error("Invalid Role Assigned To User");
           }
