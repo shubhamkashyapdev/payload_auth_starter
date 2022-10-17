@@ -24,5 +24,4 @@ payload.init({
 })
 
 // Add your own express routes here
-
 app.listen(3000);
