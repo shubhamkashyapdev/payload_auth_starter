@@ -2,7 +2,7 @@ import { CollectionConfig } from 'payload/types';
 import { isAdmin } from '../access/admin';
 import { OTPPayload } from '../types';
 import { getToken } from '../utils/utils';
-import { sendEmail } from './hooks/SendEmail';
+import { sendEmail } from './hooks/sendEmail';
 
 
 const Users: CollectionConfig = {
@@ -19,6 +19,11 @@ const Users: CollectionConfig = {
     delete: isAdmin,
   },
   fields: [
+    {
+      name: "avatar",
+      type: "upload",
+      relationTo: "media"
+    },
     {
       name: "role",
       type: "select",

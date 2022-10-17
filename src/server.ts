@@ -1,10 +1,12 @@
 import express from 'express';
 import payload from 'payload';
-import nodemailerSendgrid from 'nodemailer-sendgrid'
-const sendGridAPIKey = process.env.SENDGRID_API_KEY;
+import path from 'path'
 
 require('dotenv').config();
 const app = express();
+
+// expose assets directory as public
+app.use('/assets', express.static(path.resolve(__dirname, '../assets')));
 
 // Redirect root to Admin panel
 app.get('/', (_, res) => {
@@ -18,16 +20,7 @@ payload.init({
   express: app,
   onInit: () => {
     payload.logger.info(`Payload Admin URL: ${payload.getAdminURL()}`)
-  },
-  ...sendGridAPIKey ? {
-    email: {
-      transportOptions: nodemailerSendgrid({
-        apiKey: sendGridAPIKey,
-      }),
-      fromName: 'Admin',
-      fromAddress: 'admin@example.com',
-    },
-  } : {}
+  }
 })
 
 // Add your own express routes here

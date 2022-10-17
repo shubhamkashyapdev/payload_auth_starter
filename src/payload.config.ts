@@ -1,13 +1,29 @@
 import { buildConfig } from 'payload/config';
 import path from 'path';
-// import Examples from './collections/Examples';
+
+// Graphics
+import Logo from './components/Logo'
+import Icon from './components/Icon';
+
 import Users from './collections/Users';
-const sendEmilPath = path.resolve(__dirname, 'collections/hooks/SendEmail.ts');
+import { Media } from './collections/Media';
+const sendEmilPath = path.resolve(__dirname, 'collections/hooks/sendEmail.ts');
 const mockEmailModulePath = path.resolve(__dirname, 'mocks/sendEmail.ts');
 export default buildConfig({
   serverURL: 'http://localhost:3000',
   admin: {
     user: Users.slug,
+    meta: {
+      titleSuffix: "- Payload Auth",
+      favicon: '/assets/favicon.png',
+      ogImage: '/assets/logo.png',
+    },
+    components: {
+      graphics: {
+        Logo,
+        Icon,
+      }
+    },
     webpack: (config) => ({
       ...config,
       resolve: {
@@ -21,6 +37,7 @@ export default buildConfig({
   },
   collections: [
     Users,
+    Media,
   ],
   typescript: {
     outputFile: path.resolve(__dirname, 'payload-types.ts'),
