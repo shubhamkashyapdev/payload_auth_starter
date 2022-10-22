@@ -10,7 +10,7 @@ import { Media } from './collections/Media';
 const sendEmilPath = path.resolve(__dirname, 'collections/hooks/sendEmail.ts');
 const mockEmailModulePath = path.resolve(__dirname, 'mocks/sendEmail.ts');
 export default buildConfig({
-  serverURL: 'http://localhost:3000',
+  serverURL: process.env.SERVER_URL,
   admin: {
     user: Users.slug,
     meta: {
